@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<plugin id="cordova-plugin-empatica-device" version="0.0.1" xmlns="http://apache.org/cordova/ns/plugins/1.0"
+        xmlns:android="http://schemas.android.com/apk/res/android">
+    <name>Empatica</name>
+    <js-module name="Empatica" src="www/Empatica.js">
+        <clobbers target="cordova.plugins.Empatica"/>
+    </js-module>
+    <platform name="android">
+        <config-file parent="/*" target="res/xml/config.xml">
+            <feature name="Empatica">
+                <param name="android-package" value="au.edu.sydney.poscomp.Empatica"/>
+            </feature>
+        </config-file>
+        <config-file parent="/*" target="AndroidManifest.xml">
+            <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+        </config-file>
+        <source-file src="src/android/Empatica.java" target-dir="src/cordova-plugin-empatica-device/Empatica"/>
+        <source-file src="src/android/empalink-2.1.aar" target-dir="libs"/>
+    </platform>
+</plugin>
