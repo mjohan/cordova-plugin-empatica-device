@@ -3,10 +3,10 @@ package au.edu.sydney.poscomp;
 import android.bluetooth.BluetoothDevice;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CallbackContext;
+import org.apache.cordova.PluginResult;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -25,10 +25,25 @@ import com.empatica.empalink.delegate.EmpaStatusDelegate;
  */
 public class Empatica extends CordovaPlugin implements EmpaDataDelegate, EmpaStatusDelegate {
 
-  private final long SCANNING_PERIOD = 10000;
+  public static final String ACC_SENSOR = "acc_sensor";
+  public static final String BVP_SENSOR = "bvp_sensor";
+  public static final String BATTERY_SENSOR = "battery_sensor";
+  public static final String GSR_SENSOR = "gsr_sensor";
+  public static final String IBI_SENSOR = "ibi_sensor";
+  public static final String TEMP_SENSOR = "temp_sensor";
+
+  private final long SCANNING_PERIOD = 15000; // 15 seconds
 
   private EmpaDeviceManager mDeviceManager = null;
+
   private CallbackContext mCallbackSetup = null;
+  private CallbackContext mCallbackAcc = null;
+  private CallbackContext mCallbackBVP = null;
+  private CallbackContext mCallbackBattery = null;
+  private CallbackContext mCallbackGSR = null;
+  private CallbackContext mCallbackIBI = null;
+  private CallbackContext mCallbackTemp = null;
+
   private boolean mDisconnectAttempt = false;
   private boolean mDeviceConnected = false;
   private boolean mStreamingData = false;
@@ -54,6 +69,23 @@ public class Empatica extends CordovaPlugin implements EmpaDataDelegate, EmpaSta
       cordova.getThreadPool().execute(new Runnable() {
         public void run() {
           disconnect(callbackContext);
+        }
+      });
+      return true;
+    } else if (action.equals("subscribe")) {
+      mStreamingData = true;
+      final String sensor = args.getString(0);
+      cordova.getThreadPool().execute(new Runnable() {
+        public void run() {
+          subscribe(sensor, callbackContext);
+        }
+      });
+      return true;
+    } else if (action.equals("unsubscribe")) {
+      final String sensor = args.getString(0);
+      cordova.getThreadPool().execute(new Runnable() {
+        public void run() {
+          unsubscribe(sensor, callbackContext);
         }
       });
       return true;
@@ -100,6 +132,49 @@ public class Empatica extends CordovaPlugin implements EmpaDataDelegate, EmpaSta
     mDeviceManager.disconnect();
   }
 
+  /** subscribes to one of sensors provided by empatica device */
+  private void subscribe(String sensor, CallbackContext callbackContext) {
+    if (!mDeviceConnected) {
+      callbackContext.error("Cannot subscribe, should be initialized and connected first.");
+    }
+
+    if (sensor.equals(BVP_SENSOR)) {
+      mCallbackBVP = callbackContext;
+    } else if (sensor.equals(IBI_SENSOR)) {
+      mCallbackIBI = callbackContext;
+    } else if (sensor.equals(GSR_SENSOR)) {
+      mCallbackGSR = callbackContext;
+    } else if (sensor.equals(ACC_SENSOR)) {
+      mCallbackAcc = callbackContext;
+    } else if (sensor.equals(TEMP_SENSOR)) {
+      mCallbackTemp = callbackContext;
+    } else if (sensor.equals(BATTERY_SENSOR)) {
+      mCallbackBattery = callbackContext;
+    }
+  }
+
+  /** unsubscribe to one of sensors provided by empatica device */
+  private void unsubscribe(String sensor, CallbackContext callbackContext) {
+    if (!mDeviceConnected) {
+      callbackContext.error("Cannot unsubscribe, should be initialized and connected first.");
+    }
+
+    if (sensor.equals(BVP_SENSOR)) {
+      mCallbackBVP = null;
+    } else if (sensor.equals(IBI_SENSOR)) {
+      mCallbackIBI = null;
+    } else if (sensor.equals(GSR_SENSOR)) {
+      mCallbackGSR = null;
+    } else if (sensor.equals(ACC_SENSOR)) {
+      mCallbackAcc = null;
+    } else if (sensor.equals(TEMP_SENSOR)) {
+      mCallbackTemp = null;
+    } else if (sensor.equals(BATTERY_SENSOR)) {
+      mCallbackBattery = null;
+    }
+    callbackContext.success("Successfully unsubscribe sensor");
+  }
+
   @Override
   public void didUpdateStatus(EmpaStatus status) {
     if (mCallbackSetup != null) {
@@ -115,6 +190,7 @@ public class Empatica extends CordovaPlugin implements EmpaDataDelegate, EmpaSta
         } else if (mStreamingData) {
           mCallbackSetup.error("The device is disconnected.");
         }
+        mStreamingData = false;
         mDeviceConnected = false;
       }
     }
@@ -142,39 +218,95 @@ public class Empatica extends CordovaPlugin implements EmpaDataDelegate, EmpaSta
     if (mCallbackSetup != null) mCallbackSetup.error("Bluetooth is not enabled.");
   }
 
-  @Override
-  public void didReceiveAcceleration(int x, int y, int z, double timestamp) {
-    Log.d("didReceiveAcceleration", "x: " + x + " y: " + y + " z: " + z);
-    // TODO: implement later
+  public void sendCallbackData(CallbackContext callbackContext, JSONObject data) {
+    PluginResult result = new PluginResult(PluginResult.Status.OK, data);
+    result.setKeepCallback(true);
+    callbackContext.sendPluginResult(result);
   }
 
   @Override
   public void didReceiveBVP(float bvp, double timestamp) {
-    Log.d("didReceiveBVP", "bvp: " + bvp);
-    // TODO: implement later
-  }
-
-  @Override
-  public void didReceiveBatteryLevel(float battery, double timestamp) {
-    Log.d("didReceiveBatteryLevel", "battery: " + battery);
-    // TODO: implement later
-  }
-
-  @Override
-  public void didReceiveGSR(float gsr, double timestamp) {
-    Log.d("didReceiveGSR", "gsr: " + gsr);
-    // TODO: implement later
+    if (mCallbackBVP != null) {
+      try {
+        JSONObject data = new JSONObject();
+        data.put("bvp", bvp);
+        data.put("timestamp", timestamp);
+        sendCallbackData(mCallbackBVP, data);
+      } catch (JSONException e) {
+        mCallbackBVP.error("Error when preparing JSONObject");
+      }
+    }
   }
 
   @Override
   public void didReceiveIBI(float ibi, double timestamp) {
-    Log.d("didReceiveIBI", "ibi: " + ibi);
-    // TODO: implement later
+    if (mCallbackIBI != null) {
+      try {
+        JSONObject data = new JSONObject();
+        data.put("ibi", ibi);
+        data.put("timestamp", timestamp);
+        sendCallbackData(mCallbackIBI, data);
+      } catch (JSONException e) {
+        mCallbackBVP.error("Error when preparing JSONObject");
+      }
+    }
+  }
+
+  @Override
+  public void didReceiveGSR(float gsr, double timestamp) {
+    if (mCallbackGSR != null) {
+      try {
+        JSONObject data = new JSONObject();
+        data.put("gsr", gsr);
+        data.put("timestamp", timestamp);
+        sendCallbackData(mCallbackGSR, data);
+      } catch (JSONException e) {
+        mCallbackBVP.error("Error when preparing JSONObject");
+      }
+    }
+  }
+
+  @Override
+  public void didReceiveAcceleration(int x, int y, int z, double timestamp) {
+    if (mCallbackAcc != null) {
+      try {
+        JSONObject data = new JSONObject();
+        data.put("x", x);
+        data.put("y", y);
+        data.put("z", z);
+        data.put("timestamp", timestamp);
+        sendCallbackData(mCallbackAcc, data);
+      } catch (JSONException e) {
+        mCallbackBVP.error("Error when preparing JSONObject");
+      }
+    }
   }
 
   @Override
   public void didReceiveTemperature(float temp, double timestamp) {
-    Log.d("didReceiveTemperature", "temp: " + temp);
-    // TODO: implement later
+    if (mCallbackTemp != null) {
+      try {
+        JSONObject data = new JSONObject();
+        data.put("temp", temp);
+        data.put("timestamp", timestamp);
+        sendCallbackData(mCallbackTemp, data);
+      } catch (JSONException e) {
+        mCallbackBVP.error("Error when preparing JSONObject");
+      }
+    }
+  }
+
+  @Override
+  public void didReceiveBatteryLevel(float battery, double timestamp) {
+    if (mCallbackBattery != null) {
+      try {
+        JSONObject data = new JSONObject();
+        data.put("battery", battery);
+        data.put("timestamp", timestamp);
+        sendCallbackData(mCallbackBattery, data);
+      } catch (JSONException e) {
+        mCallbackBVP.error("Error when preparing JSONObject");
+      }
+    }
   }
 }
