@@ -1,0 +1,12 @@
+repositories{
+  jcenter()
+  flatDir {
+    dirs 'libs'
+  }
+}
+
+dependencies {
+  compile(name:'empalink-2.1', ext:'aar')
+  compile 'com.android.support:appcompat-v7:+'
+  compile 'com.squareup.okhttp:okhttp:2.5.0'
+}
