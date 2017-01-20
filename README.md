@@ -32,8 +32,18 @@ function onDeviceReady() {
 >**Note** You should also change the `minSdkVersion` value on your project to **19 or greater**. Please check whether your android platform has already supported this SDK version. Furthermore, please check also your build-tools version on your Android SDK if you have problems using this plugin.
 
 ## Installation
+
+* Clone this repo
+
 ```
-cordova plugin add <github-link>
+git clone -v https://github.com/mjohan/cordova-plugin-empatica-device.git
+```
+
+* Copy Empatica android framework file (**empalink-2.1.aar**) into `src/android/` directory
+
+* Add the plugin from the repo directory in your computer
+```
+cordova plugin add <path_to_the_cloned_repo>
 ```
 
 ## Methods and Constants
