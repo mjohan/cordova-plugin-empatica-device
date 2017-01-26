@@ -27,20 +27,22 @@ function onDeviceReady() {
 
 ### Supported Platform
 
+* iOS (8.0 or greater)
 * Android (4.4 or greater) as Empatica Android SDK has `minSdkVersion = 19` value in it.
 
 >**Note** You should also change the `minSdkVersion` value on your project to **19 or greater**. Please check whether your android platform has already supported this SDK version. Furthermore, please check also your build-tools version on your Android SDK if you have problems using this plugin.
 
 ## Installation
 
-* Clone this repo
+* From outside your project directory, clone this repo
 
 ```
 git clone -v https://github.com/mjohan/cordova-plugin-empatica-device.git
 ```
 
 * Copy Empatica android framework file (**empalink-2.1.aar**) into `src/android/` directory
-
+* Copy Empatica ios framework file (**EmpaLink-ios-0.7-full.framework**) into `src/ios/` directory
+* Go to your project directory
 * Add the plugin from the repo directory in your computer
 ```
 cordova plugin add <path_to_the_cloned_repo>
@@ -187,3 +189,7 @@ If you find any problems with this plugin, please create an issue or create a pu
 ## Credits
 
  * [Empatica Android sample project](https://github.com/empatica/empalink-sample-project-android) which provides an example for building this plugin.
+ * [Alberto Guarino](http://developer.empatica.com/#ios) who gives an iOS project example for connecting a single Empatica device
+ * [cordova-plugin-empatica](https://github.com/patte/cordova-plugin-empatica) which indicates that we have to include other frameworks for iOS platform to work
+ * [cordova-plugin-ble-central](https://github.com/don/cordova-plugin-ble-central) which gives information about `NSBluetoothPeripheralUsageDescription` and `UIBackgroundModes` for iOS platform
+ * [cordova-plugin-msband](https://github.com/wshaheer/cordova-plugin-msband) which gives me an idea to use `setKeepCallback` method
