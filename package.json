@@ -1,0 +1,29 @@
+{
+  "name": "cordova-plugin-empatica-device",
+  "version": "1.0.0",
+  "description": "cordova plugin to connect and get sensor data from Empatica device (especially E4)",
+  "cordova": {
+    "id": "cordova-plugin-empatica-device",
+    "platforms": [
+      "android",
+      "ios"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mjohan/cordova-plugin-empatica-device.git"
+  },
+  "keywords": [
+    "ecosystem:cordova",
+    "cordova-android",
+    "cordova-ios",
+    "empatica",
+    "sensor"
+  ],
+  "author": "Muhammad Johan Alibasa",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mjohan/cordova-plugin-empatica-device/issues"
+  },
+  "homepage": "https://github.com/mjohan/cordova-plugin-empatica-device#readme"
+}
