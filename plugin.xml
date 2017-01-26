@@ -3,7 +3,7 @@
         xmlns:android="http://schemas.android.com/apk/res/android">
     <name>Empatica</name>
     <js-module name="Empatica" src="www/Empatica.js">
-        <clobbers target="Empatica" />
+        <clobbers target="Empatica"/>
     </js-module>
     <platform name="android">
         <config-file parent="/*" target="res/xml/config.xml">
@@ -12,10 +12,38 @@
             </feature>
         </config-file>
         <config-file parent="/*" target="AndroidManifest.xml">
-            <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+            <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
         </config-file>
         <source-file src="src/android/Empatica.java" target-dir="src/au/edu/sydney/poscomp/"/>
-        <framework src="src/android/Empatica.gradle" custom="true" type="gradleReference" />
+        <framework custom="true" src="src/android/Empatica.gradle" type="gradleReference"/>
         <source-file src="src/android/empalink-2.1.aar" target-dir="libs/"/>
+    </platform>
+    <platform name="ios">
+        <config-file parent="/*" target="config.xml">
+            <feature name="Empatica">
+                <param name="ios-package" value="Empatica"/>
+            </feature>
+        </config-file>
+        <header-file src="src/ios/Empatica.h" />
+        <source-file src="src/ios/Empatica.m"/>
+        <framework src="ExternalAccessory.framework" />
+        <framework src="libz.dylib" />
+        <framework src="CoreBluetooth.framework" />
+        <framework src="CoreMotion.framework" />
+        <framework src="CFNetwork.framework" />
+        <framework src="MessageUI.framework" />
+        <framework src="Security.framework" />
+        <framework src="Accelerate.framework" />
+        <framework src="src/ios/EmpaLink-ios-0.7-full.framework" custom="true" />
+
+        <preference name="BLUETOOTH_USAGE_DESC" default="We need bluetooth access to connect to your device." />
+        <config-file target="*-Info.plist" parent="NSBluetoothPeripheralUsageDescription">
+            <string>$BLUETOOTH_USAGE_DESC</string>
+        </config-file>
+        <config-file parent="UIBackgroundModes" target="*-Info.plist">
+            <array>
+                <string>bluetooth-central</string>
+            </array>
+        </config-file>
     </platform>
 </plugin>
